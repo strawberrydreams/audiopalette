@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스레드형 게시판</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      padding: 2rem;
+    }
+    .thread-container {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .post {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 1rem 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: background-color 0.2s;
+    }
+    .post:hover {
+      background-color: #f5f8fa;
+    }
+    .post a {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .post .meta {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 0.3rem;
+    }
+    .post .content {
+      font-size: 1rem;
+      color: #14171a;
+    }
+    .new-post {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 16px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .new-post textarea {
+      width: 100%;
+      height: 80px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.5rem;
+      font-size: 1rem;
+      resize: none;
+    }
+    .new-post button {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background-color: #1da1f2;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .new-post button:hover {
+      background-color: #1991da;
+    }
+  </style>
+</head>
+<body>
+  <div class="thread-container">
+    <div class="new-post">
+      <form id="postForm">
+        <textarea id="newPostContent" placeholder="무슨 생각을 하고 있나요?"></textarea>
+        <button type="submit">게시하기</button>
+      </form>
+    </div>
+
+    <div id="posts">
+      <div class="post">
+        <a href="postdetail.html?id=1">
+          <div class="meta">user1 · 2025-05-24</div>
+          <div class="content">이것은 첫 번째 게시글입니다.</div>
+        </a>
+      </div>
+
+      <div class="post">
+        <a href="postdetail.html?id=2">
+          <div class="meta">user4 · 2025-05-24</div>
+          <div class="content">두 번째 독립적인 게시글입니다.</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('postForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const content = document.getElementById('newPostContent').value.trim();
+      if (!content) return;
+
+      const newId = Math.floor(Math.random() * 10000); // 임시 ID 생성
+      const postHTML = `
+        <div class="post">
+          <a href="post.html?id=${newId}">
+            <div class="meta">user · ${new Date().toISOString().split('T')[0]}</div>
+            <div class="content">${content}</div>
+          </a>
+        </div>
+      `;
+
+      const postsContainer = document.getElementById('posts');
+      postsContainer.insertAdjacentHTML('afterbegin', postHTML);
+      document.getElementById('newPostContent').value = '';
+    });
+  </script>
+</body>
+</html>

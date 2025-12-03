@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>로그인 - 트위터 스타일</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white flex items-center justify-center min-h-screen">
+  <div class="w-full max-w-md p-6 border rounded-xl shadow-sm">
+    <div class="text-center mb-6">
+      <div class="text-5xl">🐦</div>
+      <h1 class="text-2xl font-bold mt-2">트위터에 로그인</h1>
+    </div>
+    <form class="space-y-4">
+      <input type="text" placeholder="이메일 또는 사용자 이름"
+             class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="password" placeholder="비밀번호"
+             class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <button type="submit"
+              class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition">
+        로그인
+      </button>
+    </form>
+    <p class="mt-4 text-center text-sm text-gray-500">
+      계정이 없으신가요?
+      <a href="signup.html" class="text-blue-500 hover:underline">가입하기</a>
+    </p>
+  </div>
+</body>
+</html>

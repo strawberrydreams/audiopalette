@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게시글 상세 보기</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .meta {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 0.5rem;
+    }
+    .content {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .replies {
+      margin-top: 1.5rem;
+      border-top: 1px solid #ddd;
+      padding-top: 1rem;
+    }
+    .reply {
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+    .reply .meta {
+      font-size: 0.8rem;
+      color: #777;
+      margin-bottom: 0.3rem;
+    }
+    .reply .content {
+      font-size: 1rem;
+    }
+    .new-reply {
+      margin-top: 1.5rem;
+    }
+    textarea {
+      width: 100%;
+      height: 80px;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      resize: none;
+    }
+    button {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background-color: #1da1f2;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1991da;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="post"></div>
+
+    <div class="replies" id="replies"></div>
+
+    <div class="new-reply">
+      <h4>댓글 작성</h4>
+      <textarea id="replyInput" placeholder="댓글을 입력하세요..."></textarea>
+      <button onclick="addReply()">댓글 등록</button>
+    </div>
+  </div>
+
+  <script>
+    const dummyPosts = {
+      1: {
+        user: 'user1',
+        date: '2025-05-24',
+        content: '이것은 첫 번째 게시글입니다.',
+        replies: [
+          { user: 'user2', content: '댓글입니다.' },
+          { user: 'user3', content: '또 다른 댓글입니다.' }
+        ]
+      },
+      2: {
+        user: 'user4',
+        date: '2025-05-24',
+        content: '두 번째 게시글입니다.',
+        replies: [
+          { user: 'user5', content: '두 번째 게시글에 대한 댓글입니다.' }
+        ]
+      }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const postId = params.get('id');
+    const post = dummyPosts[postId];
+
+    const postEl = document.getElementById('post');
+    const repliesEl = document.getElementById('replies');
+
+    if (post) {
+      postEl.innerHTML = `
+        <div class="meta">${post.user} · ${post.date}</div>
+        <div class="content">${post.content}</div>
+      `;
+
+      renderReplies();
+    } else {
+      postEl.innerHTML = '<p>존재하지 않는 게시글입니다.</p>';
+    }
+
+    function renderReplies() {
+      repliesEl.innerHTML = '<h4>댓글</h4>' + post.replies.map(r => `
+        <div class="reply">
+          <div class="meta">${r.user}</div>
+          <div class="content">${r.content}</div>
+        </div>
+      `).join('');
+    }
+
+    function addReply() {
+      const input = document.getElementById('replyInput');
+      const content = input.value.trim();
+      if (!content) return;
+      post.replies.push({ user: 'user', content });
+      input.value = '';
+      renderReplies();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AUDIOPALETTE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body id="page" class="min-h-screen flex flex-col items-center justify-center font-sans transition-all duration-500 bg-gradient-to-b from-sky-200 via-blue-100 to-green-100">
+
+    <!-- 로고 -->
+    <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-white to-cyan-400 drop-shadow-md mb-10 tracking-widest">
+      AUDIOPALETTE
+    </h1>
+
+    <!-- 카드 -->
+    <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md flex flex-col items-center space-y-4">
+      <h2 class="text-2xl font-semibold">무엇을 도와드릴까요?</h2>
+      <span id="statusMessage" class="text-sm bg-gray-200 px-3 py-1 rounded-full hidden">결과물을 생성하는 중...</span>
+
+      <div class="flex justify-center items-center space-x-4 text-2xl">
+        <button class="bg-black text-white rounded-full w-12 h-12 flex items-center justify-center text-xl">▶</button>
+      </div>
+
+      <button class="bg-blue-200 hover:bg-blue-300 px-4 py-2 rounded-full text-sm">
+        다운로드
+      </button>
+
+      <div class="w-full space-y-2">
+        <div class="flex items-center justify-between text-sm">
+          <button class="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded-full">Magenta Melody ＋</button>
+          <button class="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded-full">$ ∞</button>
+        </div>
+        <div class="flex items-center border border-gray-300 rounded-xl overflow-hidden">
+          <textarea
+            placeholder="Insert Prompt..."
+            class="w-full px-4 py-2 outline-none resize-none h-20"
+          ></textarea>
+          <button class="px-4 text-xl" onclick="showStatus()">▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 등급 버튼 -->
+    <div class="flex space-x-4 mt-8">
+      <button 
+        onclick="setTheme('basic')" 
+        class="bg-blue-200 hover:bg-blue-300 text-black px-6 py-2 rounded-full"
+        style="transition: background-color 0.3s;">
+        기본
+    </button>
+      <button 
+        onclick="setTheme('advanced')" 
+        class="bg-blue-400 hover:bg-blue-500 text-white px-6 py-2 rounded-full"
+        style="transition: background-color 0.3s;">
+        고급
+    </button>
+      <button 
+        onclick="setTheme('superAdvanced')" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full"
+        style="transition: background-color 0.3s;">
+        슈퍼 고급
+    </button>
+    </div>
+
+    <!-- 오른쪽 메뉴 -->
+    <div class="fixed top-1/2 right-4 flex flex-col space-y-3 -translate-y-1/2">
+      <button 
+        onclick="setInfo('profile')"
+        class="w-10 h-10 rounded-full bg-white hover:bg-pink text-sm">프</button>
+      <button
+        onclick="setInfo('account')"
+        class="w-10 h-10 rounded-full bg-white hover:bg-pink text-sm">계</button>
+      <button
+        onclick="setInfo('setting')"
+        class="w-10 h-10 rounded-full bg-white hover:bg-pink text-sm">설</button>
+    </div>
+
+    <!-- Javascript -->
+    <script>
+      const generateBtn = document.getElementById("generate-btn");
+      const refreshBtn = document.getElementById("refresh-btn");
+      const audio = document.getElementById("audio");
+      const download = document.getElementById("download");
+
+      let isGenerating = false;
+
+      generateBtn.addEventListener("click", generateMusic);
+      refreshBtn.addEventListener("click", () => {
+        // 페이지를 수동으로 새로고침
+        window.location.reload();
+      });
+
+      async function generateMusic() {
+        if (isGenerating) return;
+        isGenerating = true;
+        generateBtn.disabled = true;
+        generateBtn.innerText = "🎵 생성 중...";
+        const model = document.getElementById("model-select").value;
+        const prompt = document.getElementById("prompt").value;
+
+        const formData = new FormData();
+        formData.append("prompt", prompt);
+        formData.append("model", model);
+
+        const apiUrl = model.startsWith("musicgen")
+          ? "http://127.0.0.1:8000/generate"
+          : "http://127.0.0.1:8001/generate";
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+
+          // 확장자 및 파일명 설정
+          // const ext = model.startsWith("magenta") ? ".mid" : ".wav";
+          // const filename = `output${ext}`;
+          const ext = ".wav";
+          const filename = `output${ext}`;
+
+          // 오디오 플레이어 설정 (wav만 재생)
+          if (ext === ".wav") {
+            audio.src = url;
+            audio.style.display = "block";
+          } else if (ext === ".mid") {
+            audio.src = url;
+            audio.style.display = "block";
+          } else {
+            audio.style.display = "none";
+          }
+
+          // 다운로드 링크 설정
+          download.href = url;
+          download.download = filename;
+          download.textContent = `🔽 다운로드 (${filename})`;
+          download.style.display = "inline";
+
+        } catch (err) {
+          alert("오류가 발생했습니다: " + err.message);
+        } finally {
+          isGenerating = false;
+          generateBtn.disabled = false;
+          generateBtn.innerText = "🎵 생성하기";
+        }
+      }
+    </script>
+  </body>
+</html>

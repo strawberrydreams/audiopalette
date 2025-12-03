@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AUDIOPALETTE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body id="page" class="min-h-screen flex flex-col items-center justify-center font-sans transition-all duration-500 bg-gradient-to-b from-sky-200 via-blue-100 to-green-100">
+
+    <!-- 로고 -->
+    <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-white to-cyan-400 drop-shadow-md mb-10 tracking-widest">
+      AUDIOPALETTE
+    </h1>
+
+    <!-- 카드 -->
+    <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md flex flex-col items-center space-y-4">
+      <h2 class="text-2xl font-semibold">무엇을 도와드릴까요?</h2>
+      <span id="statusMessage" class="text-sm bg-gray-200 px-3 py-1 rounded-full hidden">결과물을 생성하는 중...</span>
+
+      <!-- 모델 선택 및 프롬프트 입력 -->
+      <div class="w-full space-y-4">
+        <div class="flex flex-col space-y-1 w-full">
+          <label for="model-select" class="text-sm font-medium">모델 선택:</label>
+          <select id="model-select" class="border border-gray-300 rounded-xl px-3 py-2 w-full">
+            <option value="musicgen-small">MusicGen Small</option>
+            <option value="musicgen-medium">MusicGen Medium</option>
+            <option value="musicgen-large">MusicGen Large</option>
+            <option value="magenta-basic">Magenta Basic</option>
+            <option value="magenta-drums">Magenta Drum</option>
+            <option value="magenta-attention">Magenta Attention</option>
+          </select>
+        </div>
+        <div class="flex flex-col space-y-1 w-full">
+          <label for="prompt" class="text-sm font-medium">프롬프트:</label>
+          <input id="prompt" type="text" placeholder="Insert Prompt..." class="border border-gray-300 rounded-xl px-3 py-2 w-full" />
+        </div>
+        <div class="flex justify-center space-x-4">
+          <button id="generate-btn" class="bg-black text-white rounded-full w-36 py-2 text-lg">🎵 생성하기</button>
+          <button id="refresh-btn" class="bg-gray-200 hover:bg-gray-300 rounded-full w-12 h-12 flex items-center justify-center">🔄</button>
+        </div>
+        <div class="flex flex-col items-center w-full">
+          <audio id="audio" controls class="w-full mt-2 hidden"></audio>
+          <a id="download" href="#" download class="mt-2 text-blue-500 hidden">🔽 다운로드</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 등급 버튼 -->
+    <div class="flex space-x-4 mt-8">
+      <button 
+        onclick="setTheme('basic')" 
+        class="bg-blue-200 hover:bg-blue-300 text-black px-6 py-2 rounded-full"
+        style="transition: background-color 0.3s;">
+        기본
+      </button>
+      <button 
+        onclick="setTheme('advanced')" 
+        class="bg-blue-400 hover:bg-blue-500 text-white px-6 py-2 rounded-full"
+        style="transition: background-color 0.3s;">
+        고급
+      </button>
+      <button 
+        onclick="setTheme('superAdvanced')" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full"
+        style="transition: background-color 0.3s;">
+        슈퍼 고급
+      </button>
+    </div>
+
+    <!-- 오른쪽 메뉴 -->
+    <div class="fixed top-1/2 right-4 flex flex-col space-y-3 -translate-y-1/2">
+      <button 
+        onclick="setInfo('profile')"
+        class="w-10 h-10 rounded-full bg-white hover:bg-pink text-sm">프</button>
+      <button
+        onclick="setInfo('account')"
+        class="w-10 h-10 rounded-full bg-white hover:bg-pink text-sm">계</button>
+      <button
+        onclick="setInfo('setting')"
+        class="w-10 h-10 rounded-full bg-white hover:bg-pink text-sm">설</button>
+    </div>
+
+    <!-- Javascript -->
+    <script>
+      const generateBtn = document.getElementById("generate-btn");
+      const refreshBtn = document.getElementById("refresh-btn");
+      const audio = document.getElementById("audio");
+      const download = document.getElementById("download");
+      const statusMessage = document.getElementById("statusMessage");
+      const page = document.getElementById("page");
+
+      let isGenerating = false;
+
+      generateBtn.addEventListener("click", generateMusic);
+      refreshBtn.addEventListener("click", () => {
+        window.location.reload();
+      });
+
+      async function generateMusic() {
+        if (isGenerating) return;
+        isGenerating = true;
+        generateBtn.disabled = true;
+        generateBtn.innerText = "🎵 생성 중...";
+        statusMessage.classList.remove("hidden");
+
+        const model = document.getElementById("model-select").value;
+        const prompt = document.getElementById("prompt").value;
+
+        const formData = new FormData();
+        formData.append("prompt", prompt);
+        formData.append("model", model);
+
+        const apiUrl = model.startsWith("musicgen")
+        // 현재는 IP 주소를 일일이 수정해야 함, 나중에 도메인으로 정식 등록
+          ? "http://184.105.3.59:8500/generate"  // MusicGen
+          : "http://184.105.3.117:8501/generate"; // Magenta
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+
+          const ext = ".wav";
+          const filename = `output${ext}`;
+
+          audio.src = url;
+          audio.classList.remove("hidden");
+
+          download.href = url;
+          download.download = filename;
+          download.textContent = `🔽 다운로드 (${filename})`;
+          download.classList.remove("hidden");
+
+        } catch (err) {
+          alert("오류가 발생했습니다: " + err.message);
+        } finally {
+          isGenerating = false;
+          generateBtn.disabled = false;
+          generateBtn.innerText = "🎵 생성하기";
+          statusMessage.classList.add("hidden");
+        }
+      }
+
+      function setTheme(theme) {
+        // 모든 테마 관련 클래스 제거
+        page.classList.remove(
+          'bg-gradient-to-b', 'from-sky-200', 'via-blue-100', 'to-green-100',
+          'from-purple-500', 'via-pink-400', 'to-yellow-300',
+          'from-gray-800', 'via-gray-600', 'to-gray-400'
+        );
+        // 원하는 테마에 맞게 클래스 추가
+        if (theme === 'basic') {
+          page.classList.add('bg-gradient-to-b', 'from-sky-200', 'via-blue-100', 'to-green-100');
+        } else if (theme === 'advanced') {
+          page.classList.add('bg-gradient-to-b', 'from-purple-500', 'via-pink-400', 'to-yellow-300');
+        } else if (theme === 'superAdvanced') {
+          page.classList.add('bg-gradient-to-b', 'from-gray-800', 'via-gray-600', 'to-gray-400');
+        }
+      }
+
+      // 오른쪽 메뉴 함수 (예시)
+      function setInfo(type) {
+        alert(type + ' 정보 표시 기능은 아직 구현되지 않았습니다.');
+      }
+    </script>
+  </body>
+</html>
