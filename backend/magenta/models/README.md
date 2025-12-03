@@ -1,2 +1,3 @@
-# audiopalette
-Natural language music generation service utilizing local LLM
+# Local LLM: Magenta by Google
+
+Download Link: [ ]
